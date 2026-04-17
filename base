@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Lost & Found</title>
+    <style>
+        :root { --primary: #4a90e2; --secondary: #f39c12; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+        .app-container { max-width: 600px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 30px; }
+        
+        /* Post Form */
+        .post-box { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        input, textarea, select { width: 100%; margin: 10px 0; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        
+        /* Feed */
+        .item-card { background: white; border-radius: 15px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .item-info { padding: 15px; }
+        .item-location { font-size: 0.9em; color: #666; font-weight: bold; }
+        .preview-img { width: 100%; height: 200px; object-fit: cover; background: #eee; display: flex; align-items: center; justify-content: center; color: #999; }
+        
+        /* Claim Modal */
+        .claim-section { display: none; margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header>
+        <h1>🏫 School Lost & Found</h1>
+        <p>Found something? Help it find its way home.</p>
+    </header>
+
+    <!-- Post Item Section -->
+    <div class="post-box">
+        <h3>Post a Found Item</h3>
+        <input type="file" id="itemPhoto" accept="image/*">
+        <input type="text" id="itemName" placeholder="What is it? (e.g. Blue Water Bottle)">
+        <input type="text" id="itemLoc" placeholder="Where did you find it? (e.g. Gym Bleachers)">
+        <textarea id="itemDesc" placeholder="Brief description..."></textarea>
+        <button onclick="postItem()">Post Item</button>
+    </div>
+
+    <!-- The Feed -->
+    <div id="feed">
+        <!-- Items will appear here -->
+    </div>
+</div>
+
+<script>
+    function postItem() {
+        const name = document.getElementById('itemName').value;
+        const loc = document.getElementById('itemLoc').value;
+        const desc = document.getElementById('itemDesc').value;
+        const feed = document.getElementById('feed');
+
+        if(!name || !loc) return alert("Please add a name and location!");
+
+        const card = document.createElement('div');
+        card.className = 'item-card';
+        card.innerHTML = `
+            <div class="preview-img">📷 [Image Uploaded]</div>
+            <div class="item-info">
+                <span class="item-location">📍 Found at: ${loc}</span>
+                <h2>${name}</h2>
+                <p>${desc}</p>
+                <button style="background: var(--secondary)" onclick="showClaim(this)">This is mine / Claim</button>
+                
+                <div class="claim-section">
+                    <h4>Schedule Pickup</h4>
+                    <select>
+                        <option>Before School (7:30 AM)</option>
+                        <option>Lunch Break (12:00 PM)</option>
+                        <option>After School (3:30 PM)</option>
+                    </select>
+                    <button onclick="confirmClaim(this)">Confirm Pickup</button>
+                </div>
+            </div>
+        `;
+
+        feed.prepend(card);
+        // Clear inputs
+        document.getElementById('itemName').value = '';
+        document.getElementById('itemLoc').value = '';
+        document.getElementById('itemDesc').value = '';
+    }
+
+    function showClaim(btn) {
+        btn.nextElementSibling.style.display = 'block';
+        btn.style.display = 'none';
+    }
+
+    function confirmClaim(btn) {
+        alert("Pickup Scheduled! Please meet at the Front Office.");
+        btn.closest('.item-card').style.opacity = '0.5';
+        btn.innerText = "Claimed / Pending Pickup";
+        btn.disabled = true;
+    }
+</script>
+
+</body>
+</html>
+
+ 
