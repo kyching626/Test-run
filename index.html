@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>School Lost & Found</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #185FA5;
+      --primary-dark: #0C447C;
+      --primary-light: #E6F1FB;
+      --bg: #f4f6f9;
+      --surface: #ffffff;
+      --border: rgba(0,0,0,0.12);
+      --border-strong: rgba(0,0,0,0.22);
+      --text: #1a1a1a;
+      --text-muted: #666;
+      --text-hint: #999;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --success-bg: #EAF3DE;
+      --success-text: #3B6D11;
+      --success-border: rgba(59,109,17,0.3);
+      --warning-bg: #FAEEDA;
+      --warning-text: #854F0B;
+      --warning-border: rgba(133,79,11,0.3);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 1rem;
+    }
+
+    .wrap { max-width: 580px; margin: 0 auto; }
+
+    /* Header */
+    .hdr { text-align: center; padding: 1.5rem 0 1.25rem; }
+    .hdr h1 { font-size: 24px; font-weight: 600; color: var(--text); }
+    .hdr p { font-size: 14px; color: var(--text-muted); margin-top: 5px; }
+
+    /* Card */
+    .card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .card-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 12px; }
+
+    /* Form elements */
+    label { font-size: 13px; color: var(--text-muted); display: block; margin-bottom: 4px; margin-top: 10px; }
+    label:first-of-type { margin-top: 0; }
+    input[type=text], input[type=email], textarea, select {
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--text);
+      background: var(--surface);
+      border: 0.5px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 9px 12px;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--primary); }
+    textarea { resize: vertical; min-height: 64px; }
+
+    /* Upload zone */
+    .upload-zone {
+      border: 1.5px dashed var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      text-align: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 13px;
+      position: relative;
+      margin-bottom: 2px;
+      transition: background 0.15s;
+    }
+    .upload-zone:hover { background: var(--bg); }
+    .upload-zone input[type=file] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .upload-zone .icon { font-size: 22px; margin-bottom: 5px; }
+    .upload-zone .sub { font-size: 11px; opacity: 0.7; margin-top: 3px; }
+    #photoPreview {
+      width: 100%; height: 170px; object-fit: cover;
+      border-radius: var(--radius-md); margin-top: 8px; display: none;
+    }
+
+    /* Buttons */
+    .btn-primary {
+      font-family: inherit; font-size: 14px; font-weight: 600;
+      cursor: pointer; border-radius: var(--radius-md);
+      padding: 10px 16px; background: var(--primary);
+      color: #fff; border: none; width: 100%; margin-top: 14px;
+      transition: background 0.15s;
+    }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-primary:active { transform: scale(0.98); }
+
+    .btn-claim {
+      font-family: inherit; font-size: 13px; font-weight: 500;
+      cursor: pointer; border-radius: var(--radius-md);
+      padding: 6px 14px;
+      background: var(--warning-bg); color: var(--warning-text);
+      border: 0.5px solid var(--warning-border);
+      transition: opacity 0.15s;
+    }
+    .btn-claim:hover { opacity: 0.8; }
+
+    .btn-confirm {
+      font-family: inherit; font-size: 13px; font-weight: 500;
+      cursor: pointer; border-radius: var(--radius-md);
+      padding: 7px 14px; background: var(--primary);
+      color: #fff; border: none; margin-top: 8px;
+      transition: background 0.15s;
+    }
+    .btn-confirm:hover { background: var(--primary-dark); }
+
+    /* Feed controls */
+    .feed-header {
+      display: flex; align-items: center; margin-bottom: 10px;
+    }
+    .feed-title { font-size: 15px; font-weight: 600; }
+    .count-pill {
+      font-size: 12px; background: #eee; color: var(--text-muted);
+      border-radius: 50px; padding: 2px 10px; margin-left: 8px;
+    }
+
+    .search-row { display: flex; gap: 8px; margin-bottom: 10px; }
+    .search-row input { flex: 1; margin: 0; }
+    .search-row select { width: 165px; flex-shrink: 0; margin: 0; }
+
+    .tabs { display: flex; gap: 6px; margin-bottom: 1rem; }
+    .tab {
+      font-size: 13px; font-weight: 500; padding: 5px 14px;
+      border-radius: 50px; border: 0.5px solid var(--border);
+      cursor: pointer; color: var(--text-muted); background: transparent;
+      transition: all 0.15s;
+    }
+    .tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+    /* Item cards */
+    .item-card {
+      background: var(--surface); border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg); margin-bottom: 1rem; overflow: hidden;
+    }
+    .item-img { width: 100%; height: 180px; object-fit: cover; display: block; }
+    .img-ph {
+      width: 100%; height: 110px; background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; color: var(--text-hint);
+    }
+    .item-body { padding: 13px 15px; }
+    .item-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 5px; }
+    .item-name { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .item-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; }
+    .item-contact { font-size: 12px; color: var(--text-hint); margin-bottom: 8px; }
+
+    .badge {
+      display: inline-block; font-size: 11px; font-weight: 600;
+      padding: 3px 10px; border-radius: 50px; margin-bottom: 10px;
+    }
+    .badge-open {
+      background: var(--success-bg); color: var(--success-text);
+      border: 0.5px solid var(--success-border);
+    }
+    .badge-claimed {
+      background: #eee; color: var(--text-muted);
+      border: 0.5px solid var(--border);
+    }
+
+    .claim-section {
+      display: none; margin-top: 10px; padding-top: 10px;
+      border-top: 0.5px solid var(--border);
+    }
+    .claim-section label { margin-top: 8px; }
+    .claim-section label:first-child { margin-top: 0; }
+    .claim-section input, .claim-section select { margin: 0; }
+
+    .empty {
+      text-align: center; padding: 2.5rem 1rem;
+      color: var(--text-muted); font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="hdr">
+    <h1>🏫 School Lost &amp; Found</h1>
+    <p>Found something? Help it find its way home.</p>
+  </div>
+
+  <!-- Post form -->
+  <div class="card">
+    <div class="card-title">Post a found item</div>
+
+    <div class="upload-zone" id="uploadZone">
+      <input type="file" accept="image/*" id="photoInput" onchange="handlePhoto(event)">
+      <div id="uploadPrompt">
+        <div class="icon">📷</div>
+        <div>Tap to upload a photo</div>
+        <div class="sub">JPG, PNG — optional</div>
+      </div>
+      <img id="photoPreview" alt="Preview">
+    </div>
+
+    <label for="itemName">Item name</label>
+    <input type="text" id="itemName" placeholder="e.g. Blue water bottle">
+
+    <label for="itemCat">Category</label>
+    <select id="itemCat">
+      <option value="">Select category...</option>
+      <option>Clothing</option>
+      <option>Electronics</option>
+      <option>Bottle / Lunch</option>
+      <option>Bag / Backpack</option>
+      <option>Stationery</option>
+      <option>Other</option>
+    </select>
+
+    <label for="itemLoc">Where was it found?</label>
+    <input type="text" id="itemLoc" placeholder="e.g. Gym bleachers, Room 204">
+
+    <label for="itemDesc">Description</label>
+    <textarea id="itemDesc" placeholder="Colour, brand, anything distinctive..."></textarea>
+
+    <label for="itemContact">Your contact (optional)</label>
+    <input type="text" id="itemContact" placeholder="Name or email so the owner can reach you">
+
+    <button class="btn-primary" onclick="postItem()">Post item</button>
+  </div>
+
+  <!-- Feed -->
+  <div class="feed-header">
+    <span class="feed-title">Items</span>
+    <span class="count-pill" id="countPill">0</span>
+  </div>
+
+  <div class="search-row">
+    <input type="text" id="searchBox" placeholder="Search items..." oninput="renderFeed()">
+    <select id="filterCat" onchange="renderFeed()">
+      <option value="">All categories</option>
+      <option>Clothing</option>
+      <option>Electronics</option>
+      <option>Bottle / Lunch</option>
+      <option>Bag / Backpack</option>
+      <option>Stationery</option>
+      <option>Other</option>
+    </select>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="setTab('all', this)">All</div>
+    <div class="tab" onclick="setTab('open', this)">Available</div>
+    <div class="tab" onclick="setTab('claimed', this)">Claimed</div>
+  </div>
+
+  <div id="feed"></div>
+</div>
+
+<script>
+  let items = [];
+  let currentTab = 'all';
+  let photoDataUrl = null;
+
+  function handlePhoto(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      photoDataUrl = ev.target.result;
+      const preview = document.getElementById('photoPreview');
+      const prompt = document.getElementById('uploadPrompt');
+      preview.src = photoDataUrl;
+      preview.style.display = 'block';
+      prompt.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function postItem() {
+    const name = document.getElementById('itemName').value.trim();
+    const loc = document.getElementById('itemLoc').value.trim();
+    const cat = document.getElementById('itemCat').value;
+    const desc = document.getElementById('itemDesc').value.trim();
+    const contact = document.getElementById('itemContact').value.trim();
+
+    if (!name || !loc) {
+      alert('Please enter an item name and where it was found.');
+      return;
+    }
+
+    items.unshift({
+      id: Date.now(),
+      name, loc,
+      cat: cat || 'Other',
+      desc, contact,
+      photo: photoDataUrl,
+      status: 'open',
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    });
+
+    // Reset form
+    document.getElementById('itemName').value = '';
+    document.getElementById('itemLoc').value = '';
+    document.getElementById('itemCat').value = '';
+    document.getElementById('itemDesc').value = '';
+    document.getElementById('itemContact').value = '';
+    document.getElementById('photoInput').value = '';
+    const preview = document.getElementById('photoPreview');
+    preview.style.display = 'none';
+    preview.src = '';
+    document.getElementById('uploadPrompt').style.display = '';
+    photoDataUrl = null;
+
+    renderFeed();
+  }
+
+  function setTab(tab, el) {
+    currentTab = tab;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    renderFeed();
+  }
+
+  function renderFeed() {
+    const search = document.getElementById('searchBox').value.toLowerCase();
+    const catFilter = document.getElementById('filterCat').value;
+    const feed = document.getElementById('feed');
+
+    const filtered = items.filter(it => {
+      if (currentTab === 'open' && it.status !== 'open') return false;
+      if (currentTab === 'claimed' && it.status !== 'claimed') return false;
+      if (catFilter && it.cat !== catFilter) return false;
+      if (search &&
+        !it.name.toLowerCase().includes(search) &&
+        !it.loc.toLowerCase().includes(search) &&
+        !it.desc.toLowerCase().includes(search)
+      ) return false;
+      return true;
+    });
+
+    document.getElementById('countPill').textContent = filtered.length;
+
+    if (filtered.length === 0) {
+      feed.innerHTML = '<div class="empty">No items found.</div>';
+      return;
+    }
+
+    feed.innerHTML = filtered.map(it => `
+      <div class="item-card" id="card-${it.id}">
+        ${it.photo
+          ? `<img class="item-img" src="${it.photo}" alt="${it.name}">`
+          : `<div class="img-ph">No photo uploaded</div>`}
+        <div class="item-body">
+          <div class="item-meta">📍 ${it.loc} &nbsp;·&nbsp; ${it.cat} &nbsp;·&nbsp; ${it.date}</div>
+          <div class="item-name">${it.name}</div>
+          ${it.desc ? `<div class="item-desc">${it.desc}</div>` : ''}
+          <span class="badge ${it.status === 'open' ? 'badge-open' : 'badge-claimed'}">
+            ${it.status === 'open' ? 'Available' : 'Claimed'}
+          </span>
+          ${it.contact ? `<div class="item-contact">Posted by: ${it.contact}</div>` : ''}
+          ${it.status === 'open' ? `
+            <button class="btn-claim" onclick="showClaim(${it.id}, this)">This is mine — claim it</button>
+            <div class="claim-section" id="claim-${it.id}">
+              <label>Your name</label>
+              <input type="text" id="claimName-${it.id}" placeholder="Full name">
+              <label>Schedule pickup</label>
+              <select id="claimTime-${it.id}">
+                <option>Before school — 7:30 AM</option>
+                <option>Lunch break — 12:00 PM</option>
+                <option>After school — 3:30 PM</option>
+              </select>
+              <button class="btn-confirm" onclick="confirmClaim(${it.id})">Confirm pickup</button>
+            </div>
+          ` : `<div style="font-size:13px;color:#999;">Pickup arranged — meet at Front Office</div>`}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function showClaim(id, btn) {
+    document.getElementById('claim-' + id).style.display = 'block';
+    btn.style.display = 'none';
+  }
+
+  function confirmClaim(id) {
+    const name = document.getElementById('claimName-' + id).value.trim();
+    if (!name) { alert('Please enter your name.'); return; }
+    const time = document.getElementById('claimTime-' + id).value;
+    const item = items.find(i => i.id === id);
+    if (item) item.status = 'claimed';
+    alert('Pickup scheduled for ' + time + '. Please go to the Front Office.');
+    renderFeed();
+  }
+
+  renderFeed();
+</script>
+
+</body>
+</html>
